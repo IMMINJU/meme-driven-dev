@@ -3,11 +3,8 @@ import { authenticator } from "~/auth.server"
 import { supabase } from "~/supabase.server"
 import { LoaderFunction, json } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
-import { useRef } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import Header from "../components/header"
 import Post from "../components/post"
-import Tags from "../components/tags"
 
 type BaseEntityType = { id: string; created_at: string; updated_at: string }
 type PostType = BaseEntityType & {
@@ -40,24 +37,22 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function App() {
   const { posts } = useLoaderData<{ posts: PostType[] }>()
 
-  const containerRef = useRef<HTMLDivElement>(null)
-
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-gray-100 text-gray-900 p-4 md:p-8">
+      <div className="max-w-2xl mx-auto">
+        <Header />
 
-      <main className="flex-grow">
-        <ScrollArea className="h-[calc(100vh-3.5rem)]">
-          <div ref={containerRef} className="max-w-3xl mx-auto px-4 py-6">
-            <Tags posts={posts} />
+        <main className="space-y-12">
+          <div className="max-w-3xl mx-auto px-4 py-6">
+            {/* <Tags posts={posts} /> */}
             <div className="space-y-12">
               {posts.map((post) => (
                 <Post key={post.id} post={post} />
               ))}
             </div>
           </div>
-        </ScrollArea>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

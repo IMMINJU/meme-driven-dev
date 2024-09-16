@@ -1,8 +1,6 @@
-import clsx from "clsx"
 import { AnimatePresence, motion } from "framer-motion"
-import { Flag, ThumbsUp, X } from "lucide-react"
+import { Flag, GitBranch, Hash, Terminal, ThumbsUp, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import ModalButton from "./modal-button"
 import ReportModal from "./report-modal"
@@ -40,29 +38,14 @@ type PostType = {
 
 export default function Post({ post }: { post: PostType }) {
   const [fullImageSrc, setFullImageSrc] = useState<string | null>(null)
-  const [isImageLoaded, setIsImageLoaded] = useState(false)
   const imageRefs = useRef<{ [key: string]: HTMLImageElement | null }>({})
-  console.log({ isImageLoaded })
+
   const handleImageClick = (postId: string, src: string) => {
     const img = imageRefs.current[postId]
     if (img && img.naturalHeight > img.width) {
       setFullImageSrc(src)
     }
   }
-
-  useEffect(() => {
-    const img = imageRefs.current[post.id]
-
-    if (img) {
-      // 이미지가 이미 로드된 상태라면 즉시 처리
-      if (img.complete) {
-        setIsImageLoaded(true)
-      } else {
-        // 이미지 로드가 끝나면 onLoad 이벤트가 호출되도록 설정
-        img.onload = () => setIsImageLoaded(true)
-      }
-    }
-  }, [])
 
   useEffect(() => {
     const imageElements = Object.values(imageRefs.current)
@@ -96,10 +79,13 @@ export default function Post({ post }: { post: PostType }) {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 100 }}
-      className="bg-white rounded-lg overflow-hidden shadow-sm"
+      className="bg-white rounded-lg shadow-md overflow-hidden"
     >
-      <div className="flex items-center p-4 justify-between">
-        <h2 className="text-lg font-medium text-gray-800">{post.title}</h2>
+      <div className="flex items-center p-6 justify-between">
+        <h2 className="text-xl font-semibold font-mono flex items-center">
+          <Terminal className="mr-2 text-green-600" />
+          {post.title}
+        </h2>
         <div className="flex items-center">
           <span
             className="text-sm font-medium text-gray-600"
@@ -110,54 +96,22 @@ export default function Post({ post }: { post: PostType }) {
           {/* <RankChangeIcon rankChange={post.rank_change} /> */}
         </div>
       </div>
-      <div className="relative">
-        {!isImageLoaded && (
-          <div className="w-full aspect-video bg-gray-200 rounded-lg overflow-hidden relative">
-            <motion.div
-              className="absolute inset-0 w-full h-full"
-              initial={{ opacity: 0.6 }}
-              animate={{ opacity: 1 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"
-              initial={{ x: "-100%" }}
-              animate={{ x: "0%" }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-            />
-          </div>
-        )}
-        <button
-          className="relative w-full"
-          onClick={() => handleImageClick(post.id, post.image)}
-        >
-          <img
-            ref={(el) => (imageRefs.current[post.id] = el)}
-            src={post.image}
-            alt={post.title || `Meme ${post.id}`}
-            className={clsx("w-full h-auto", { hidden: !isImageLoaded })}
-            onLoad={() => setIsImageLoaded(true)} // 이미지 로드 완료 시 스켈레톤 숨김
-          />
-        </button>
-      </div>
-      <div className="p-4">
-        <div className="flex flex-wrap gap-2 mb-3">
-          {post.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-1"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Avatar className="h-6 w-6 mr-2">
-              <AvatarImage src={post.user.photo} alt={post.user.name} />
-              <AvatarFallback>{post.user.name[0]}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-gray-600">{post.user.name}</span>
+      <button
+        className="relative w-full"
+        onClick={() => handleImageClick(post.id, post.image)}
+      >
+        <img
+          ref={(el) => (imageRefs.current[post.id] = el)}
+          src={post.image}
+          alt={post.title || `Meme ${post.id}`}
+          className="w-full h-auto"
+        />
+      </button>
+      <div className="p-6 pt-2">
+        <div className="flex justify-between items-center">
+          <div className="text-xs flex items-center justify-end text-gray-600">
+            <GitBranch className="mr-1 h-3 w-3" />
+            {post.user.name}
           </div>
           <div className="flex gap-2">
             <Button
@@ -180,6 +134,18 @@ export default function Post({ post }: { post: PostType }) {
               <Flag className="h-4 w-4" />
             </ModalButton>
           </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {post.tags.map((tag, index) => (
+            <span
+              key={index}
+              className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-mono flex items-center"
+            >
+              <Hash className="mr-1 h-3 w-3" />
+              {tag}
+            </span>
+          ))}
         </div>
       </div>
 
