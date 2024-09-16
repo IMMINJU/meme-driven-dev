@@ -1,24 +1,34 @@
-import { supabase } from "~/supabase.server"
-import { redirect } from "@remix-run/node"
+// app/utils/auth.server.ts
+import { Authenticator } from "remix-auth"
+import { GoogleStrategy } from "remix-auth-google"
+import { supabase } from "./supabase.server"
+import { sessionStorage } from "./utils/session.server"
 
-export async function login() {
-  console.log("start")
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-  })
+type User = any
 
-  if (error) {
-    throw new Error(`Login failed: ${error.message}`)
+export const authenticator = new Authenticator<User>(sessionStorage)
+
+const googleStrategy = new GoogleStrategy(
+  {
+    clientID: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL!,
+  },
+  async ({ profile }) => {
+    const { data } = await supabase
+      .from("users")
+      .upsert(
+        {
+          email: profile.emails[0].value,
+          name: profile.displayName,
+          photo: profile.photos[0].value,
+        },
+        { onConflict: "email" }
+      )
+      .select()
+
+    return data[0]
   }
+)
 
-  return redirect(data.url)
-}
-
-export async function logout() {
-  const { error } = await supabase.auth.signOut()
-  if (error) {
-    throw new Error(`Logout failed: ${error.message}`)
-  }
-
-  return redirect("/")
-}
+authenticator.use(googleStrategy)

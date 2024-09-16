@@ -1,5 +1,7 @@
-import { login } from "~/auth.server"
+// app/routes/auth/google.tsx (action)
+import { authenticator } from "~/auth.server"
+import { ActionFunction } from "@remix-run/node"
 
-export async function loader() {
-  return login()
+export const action: ActionFunction = async ({ request }) => {
+  return authenticator.authenticate("google", request)
 }

@@ -9,9 +9,14 @@ export default {
         "0%, 100%": { transform: "translateY(0)" },
         "50%": { transform: "translateY(-2px)" },
       },
+      sparkle: {
+        "0%": { transform: "scale(0) rotate(0deg)" },
+        "10%, 100%": { transform: "scale(1) rotate(360deg)" },
+      },
     },
     animation: {
-      "arrow-updown": "arrow-updown ease-in-out infinite",
+      "arrow-updown": "arrow-updown 0.7s ease-in-out",
+      sparkle: "sparkle 3s ease-in-out infinite",
     },
     extend: {
       borderRadius: {

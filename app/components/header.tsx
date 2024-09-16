@@ -1,6 +1,13 @@
 import clsx from "clsx"
-import { Compass, LogOut, Settings, Upload } from "lucide-react"
-import { useNavigate } from "@remix-run/react"
+import {
+  Compass,
+  Folder,
+  LogOut,
+  Settings,
+  Sparkles,
+  Trophy,
+} from "lucide-react"
+import { useLoaderData, useNavigate } from "@remix-run/react"
 import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -8,22 +15,21 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { UploadIcon } from "./icons"
 import ModalButton from "./modal-button"
 import UploadModal from "./upload-modal"
 
-const userId = null
-
 export default function Header() {
-  // const userId = useLoaderData<string>()
   const navigate = useNavigate()
+  const { user } = useLoaderData()
+
   const [isHovered, setIsHovered] = useState<{
     compass: boolean
     upload: boolean
   }>({ compass: false, upload: false })
-  console.log({ userId })
+
   const setHoverValue = (key: keyof typeof isHovered, value: boolean) =>
     setIsHovered((prev) => ({ ...prev, [key]: value }))
 
@@ -34,6 +40,19 @@ export default function Header() {
           Meme Driven Dev 🔧
         </h1>
         <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative text-gray-600"
+            onClick={() => navigate("/tournament")}
+          >
+            <Trophy className="w-5 h-5" />
+            <Sparkles
+              className="absolute top-1 right-0 w-3 h-3 transition-all animate-sparkle"
+              aria-hidden="true"
+            />
+            <span className="sr-only">Worldcup</span>
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -59,14 +78,10 @@ export default function Header() {
             onMouseLeave={() => setHoverValue("upload", false)}
             modalContent={() => <UploadModal />}
           >
-            <Upload
-              className={clsx("w-5 h-5 transition-all duration-700", {
-                "animate-arrow-updown": isHovered.upload,
-              })}
-            />
+            <UploadIcon animate={isHovered.upload} />
             <span className="sr-only">Upload</span>
           </ModalButton>
-          {userId && (
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -82,12 +97,26 @@ export default function Header() {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem onClick={() => {}}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+              <DropdownMenuContent
+                sideOffset={22}
+                className="w-40"
+                align="end"
+                forceMount
+              >
+                <DropdownMenuItem>
+                  <Folder className="mr-2 h-4 w-4" />
+                  Collection
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => {}}>
+                  <ModalButton
+                    variant="ghost"
+                    className="p-0 h-auto font-normal"
+                    modalContent={() => <UploadModal />}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </ModalButton>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {}}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
