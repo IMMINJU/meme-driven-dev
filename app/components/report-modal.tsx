@@ -26,9 +26,7 @@ export default function ReportModal({ postId, closeModal }: ReportModalProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Report Inappropriate Content</DialogTitle>
-          <DialogDescription>
-            Please provide a reason for reporting this post.
-          </DialogDescription>
+          <DialogDescription />
         </DialogHeader>
         <form onSubmit={submitReport} className="space-y-4">
           <div>
@@ -47,10 +45,7 @@ export default function ReportModal({ postId, closeModal }: ReportModalProps) {
             />
           </div>
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={closeModal}>
-              Cancel
-            </Button>
-            <Button type="submit">Submit Report</Button>
+            <Button type="submit">Submit()</Button>
           </div>
         </form>
       </DialogContent>

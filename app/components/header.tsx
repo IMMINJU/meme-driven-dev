@@ -2,34 +2,20 @@ import clsx from "clsx"
 import {
   Code,
   Compass,
-  Folder,
-  LogOut,
+  FolderHeart,
   Menu,
-  Search,
-  Settings,
-  Sparkles,
   Trophy,
   Upload,
+  X,
 } from "lucide-react"
-import { useLoaderData, useNavigate } from "@remix-run/react"
+import { Link } from "@remix-run/react"
 import { useState } from "react"
 import { UploadIcon } from "./icons"
 import ModalButton from "./modal-button"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Button } from "./ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu"
 import UploadModal from "./upload-modal"
 
 export default function Header() {
-  const navigate = useNavigate()
-  const { user } = useLoaderData()
-  const [isSearchVisible, setIsSearchVisible] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isHovered, setIsHovered] = useState<{
     compass: boolean
     upload: boolean
@@ -40,57 +26,43 @@ export default function Header() {
     setIsHovered((prev) => ({ ...prev, [key]: value }))
 
   return (
-    <header className="mb-12 min-h-10">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-mono font-bold flex items-center">
-          <Code className="mr-2 text-green-600" />
-          DevShots
-        </h1>
-        {!isSearchVisible && (
-          <nav className="hidden md:flex items-center space-x-4 font-mono">
-            <button
-              onClick={() => navigate("/tournament")}
-              className="relative text-sm text-gray-700 hover:text-green-600 transition-colors flex items-center"
-            >
-              <Trophy className="mr-2 h-4 w-4" />
-              <Sparkles
-                className="absolute -top-1 left-3 w-3 h-3 transition-all animate-sparkle"
-                aria-hidden="true"
-              />
-              Tournament
-            </button>
-            <button
-              onMouseEnter={() => setHoverValue("compass", true)}
-              onMouseLeave={() => setHoverValue("compass", false)}
-              onClick={() => navigate("/explore")}
-              className="text-sm text-gray-700 hover:text-green-600 transition-colors flex items-center"
-            >
-              <Compass
-                className={clsx(
-                  "mr-2 w-4 h-4 transition-transform duration-500 ease-in-out",
-                  { "-rotate-90": isHovered.compass }
-                )}
-              />
-              Explore
-            </button>
+    <>
+      <header className="sticky top-0 z-50  border-gray-200">
+        <div className="max-w-5xl mx-auto flex items-center justify-between p-3">
+          <div className="flex items-center space-x-2">
+            <Code className="h-6 w-6 text-gray-800" />
+            <h1 className="text-xl font-semibold text-gray-800">DevShots</h1>
+          </div>
+          <div className="flex gap-x-4 items-center">
             <ModalButton
               variant="ghost"
               onMouseEnter={() => setHoverValue("upload", true)}
               onMouseLeave={() => setHoverValue("upload", false)}
-              modalContent={() => <UploadModal />}
-              className="text-gray-700 p-0 hover:text-green-600 flex items-center gap-x-1"
+              modalContent={(closeModal) => (
+                <UploadModal onClose={closeModal} />
+              )}
+              className="p-0 flex items-center gap-x-3 text-gray-600 hover:text-gray-800 hover:bg-transparent hover:underline underline-offset-2"
             >
-              <UploadIcon animate={isHovered.upload} />
-              Upload
+              <p className="hidden sm:block text-sm font-medium">{`meme.upload()`}</p>
+
+              <div
+                className={clsx(
+                  "flex items-center text-white justify-center h-8 w-8 max-w-8 rounded-sm bg-gray-800 transition duration-150 ease-in-out",
+                  { "bg-gray-900": isHovered.upload }
+                )}
+              >
+                <UploadIcon animate={isHovered.upload} />
+              </div>
             </ModalButton>
-            {user && (
+            {/* {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
+                    type="button"
                     variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
+                    className="relative p-0"
                   >
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="rounded-full h-8 max-w-8 w-8">
                       <AvatarImage src={user.photo} alt={`@${user.name}`} />
                       <AvatarFallback>
                         {user.name[0].toUpperCase()}
@@ -99,7 +71,7 @@ export default function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  sideOffset={22}
+                  sideOffset={10}
                   className="w-40"
                   align="end"
                   forceMount
@@ -112,7 +84,9 @@ export default function Header() {
                     <ModalButton
                       variant="ghost"
                       className="p-0 h-auto font-normal"
-                      modalContent={() => <UploadModal />}
+                      modalContent={(closeModal) => (
+                        <UploadModal onClose={closeModal} />
+                      )}
                     >
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
@@ -124,67 +98,53 @@ export default function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+            ) : (
+              <div className="w-8" />
+            )} */}
+
             <button
-              onClick={() => setIsSearchVisible(true)}
-              onMouseEnter={() => setHoverValue("search", true)}
-              onMouseLeave={() => setHoverValue("search", false)}
-              className="text-gray-700 hover:text-green-600 transition-colors"
+              type="button"
+              className="md:hidden text-gray-600 hover:text-gray-800"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <Search
-                className={clsx(
-                  "h-5 w-5 transition-transform duration-300 ease-in-out",
-                  { "rotate-90": isHovered.search }
-                )}
-              />
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
-          </nav>
-        )}
-        {isSearchVisible && (
-          <div className="hidden md:flex items-center w-full max-w-md transition-all ease-in-out duration-300">
-            <input
-              placeholder="Search posts"
-              className="w-full pl-3 pr-10 py-2 bg-white border border-gray-300 rounded-md font-mono text-sm"
-            />
-            <button
-              onClick={() => setIsSearchVisible(false)}
-              className="text-sm ml-2 text-gray-700 hover:text-green-600 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-        <button
-          className="md:hidden text-gray-700 hover:text-green-600 transition-colors"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          <Menu className="h-6 w-6" />
-          <span className="sr-only">Open menu</span>
-        </button>
-      </div>
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border border-gray-200 rounded-md shadow-lg p-4 space-y-2">
-          <button className="w-full text-left text-gray-700 hover:text-green-600 transition-colors flex items-center py-2">
-            <Compass className="mr-2 h-4 w-4" />
-            Explore
-          </button>
-          <button className="w-full text-left text-gray-700 hover:text-green-600 transition-colors flex items-center py-2">
-            <Upload className="mr-2 h-4 w-4" />
-            Upload
-          </button>
-          <button className="w-full text-left text-gray-700 hover:text-green-600 transition-colors flex items-center py-2">
-            <Trophy className="mr-2 h-4 w-4" />
-            Worldcup
-          </button>
-          <div className="relative">
-            <input
-              placeholder="Search posts"
-              className="w-full pl-3 pr-10 py-2 bg-gray-100 border border-gray-300 rounded-md font-mono text-sm"
-            />
-            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
         </div>
+      </header>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-b border-gray-200 p-4">
+          <nav className="flex flex-col space-y-4 items-end">
+            <Link
+              to="/explore"
+              className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
+            >
+              <Compass className="h-4 w-4 mr-2" />
+              Explore
+            </Link>
+            <Link
+              to="tournament"
+              className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              Tournament
+            </Link>
+            <Link
+              to="collection"
+              className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
+            >
+              <FolderHeart className="h-4 w-4 mr-2" />
+              Collection
+            </Link>
+          </nav>
+        </div>
       )}
-    </header>
+    </>
   )
 }

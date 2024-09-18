@@ -1,6 +1,6 @@
 import { Button, ButtonProps } from "~/components/ui/button"
 import { Dialog } from "~/components/ui/dialog"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 interface Props extends ButtonProps, React.RefAttributes<HTMLButtonElement> {
   modalContent: (closeModal: () => void) => React.ReactNode
@@ -11,15 +11,16 @@ const ModalButton: React.FC<Props> = ({ modalContent, children, ...rest }) => {
 
   const showModal = () => setModalVisible(true)
   const closeModal = () => setModalVisible(false)
+  const memorizedModal = useMemo(() => modalContent(closeModal), [modalContent])
 
   return (
     <>
-      <Button onClick={showModal} {...rest}>
+      <Button type="button" onClick={showModal} {...rest}>
         {children}
       </Button>
 
       <Dialog open={open} onOpenChange={closeModal}>
-        {modalContent(closeModal)}
+        {memorizedModal}
       </Dialog>
     </>
   )

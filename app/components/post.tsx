@@ -1,42 +1,16 @@
 import { AnimatePresence, motion } from "framer-motion"
-import { Flag, GitBranch, Hash, Terminal, ThumbsUp, X } from "lucide-react"
+import { Calendar, Link, Tag, X } from "lucide-react"
+import { PostType } from "~/types/post"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import ModalButton from "./modal-button"
 import ReportModal from "./report-modal"
 
-const RankChangeIcon = ({ rankChange }: { rankChange: number }) => {
-  const color = rankChange === 0 ? "text-gray-400" : "text-gray-700"
-  const rotation = rankChange < 0 ? "rotate-180" : ""
-  const ariaLabel =
-    rankChange > 0 ? "순위 상승" : rankChange < 0 ? "순위 하락" : "순위 유지"
-
-  return (
-    <svg
-      className={`w-4 h-4 ${color} ${rotation}`}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-label={ariaLabel}
-    >
-      <path d="M17 16l-5-5-5 5" />
-      <path d="M17 10l-5-5-5 5" />
-    </svg>
-  )
+interface Props {
+  post: PostType
 }
 
-type PostType = {
-  id: string
-  title: string
-  tags: string[]
-  image: string
-  user: { photo: string; name: string }
-}
-
-export default function Post({ post }: { post: PostType }) {
+export default function Post({ post }: Props) {
   const [fullImageSrc, setFullImageSrc] = useState<string | null>(null)
   const imageRefs = useRef<{ [key: string]: HTMLImageElement | null }>({})
 
@@ -45,6 +19,14 @@ export default function Post({ post }: { post: PostType }) {
     if (img && img.naturalHeight > img.width) {
       setFullImageSrc(src)
     }
+  }
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
   }
 
   useEffect(() => {
@@ -74,29 +56,19 @@ export default function Post({ post }: { post: PostType }) {
   }, [])
 
   return (
-    <motion.div
-      key={post.id}
+    <motion.article
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 100 }}
-      className="bg-white rounded-lg shadow-md overflow-hidden"
+      className="bg-white border border-gray-200 rounded overflow-hidden shadow-sm hover:shadow-md"
     >
-      <div className="flex items-center p-6 justify-between">
-        <h2 className="text-xl font-semibold font-mono flex items-center">
-          <Terminal className="mr-2 text-green-600" />
-          {post.title}
-        </h2>
-        <div className="flex items-center">
-          <span
-            className="text-sm font-medium text-gray-600"
-            aria-live="polite"
-          >
-            {/* {post.rank_change > 0 ? `+${post.rank_change}` : post.rank_change} */}
-          </span>
-          {/* <RankChangeIcon rankChange={post.rank_change} /> */}
-        </div>
+      <div className="p-3 border-b border-gray-200">
+        <h3 className="text-base font-semibold text-gray-800">
+          $ {post.title}
+        </h3>
       </div>
       <button
+        type="button"
         className="relative w-full"
         onClick={() => handleImageClick(post.id, post.image)}
       >
@@ -107,45 +79,59 @@ export default function Post({ post }: { post: PostType }) {
           className="w-full h-auto"
         />
       </button>
-      <div className="p-6 pt-2">
-        <div className="flex justify-between items-center">
-          <div className="text-xs flex items-center justify-end text-gray-600">
-            <GitBranch className="mr-1 h-3 w-3" />
-            {post.user.name}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <div className="flex items-center gap-2">
-                <ThumbsUp className="h-4 w-4" />
-                {/* <span className="text-sm text-gray-500">{post.votes}</span> */}
-              </div>
-            </Button>
-            <ModalButton
-              variant="ghost"
-              size="icon"
-              className="text-gray-500 hover:text-gray-700"
-              modalContent={(onClose) => (
-                <ReportModal postId={post.id} closeModal={onClose} />
-              )}
-            >
-              <Flag className="h-4 w-4" />
-            </ModalButton>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {post.tags.map((tag, index) => (
+      <div className="p-3">
+        <div className="flex flex-wrap gap-1 mb-3">
+          {post.tags.map((tag) => (
             <span
-              key={index}
-              className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-mono flex items-center"
+              key={tag}
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
             >
-              <Hash className="mr-1 h-3 w-3" />
+              <Tag className="h-3 w-3 mr-1" />
               {tag}
             </span>
           ))}
+        </div>
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+          <div className="flex items-center space-x-3">
+            <span className="flex items-center">
+              <Calendar className="h-4 w-4 mr-1" />
+              {formatDate(post.created_at)}
+            </span>
+            <span>{24} Likes</span>
+          </div>
+          <div className="flex items-center">
+            <span className="font-medium text-gray-800">@{post.user.name}</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          {post.source?.type === "link" ? (
+            <a
+              href={post.source.value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center hover:text-blue-500 transition duration-150 ease-in-out"
+            >
+              <Link className="h-4 w-4 mr-1" />
+              {post.source.value}
+            </a>
+          ) : post.source?.type === "text" ? (
+            <p className="flex items-center transition duration-150 ease-in-out">
+              <Link className="h-4 w-4 mr-1" />
+              {post.source.value}
+            </p>
+          ) : (
+            <div />
+          )}
+
+          <ModalButton
+            variant="ghost"
+            className="p-0 hover:bg-transparent text-xs font-normal text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out"
+            modalContent={(onClose) => (
+              <ReportModal postId={post.id} closeModal={onClose} />
+            )}
+          >
+            Report
+          </ModalButton>
         </div>
       </div>
 
@@ -171,6 +157,7 @@ export default function Post({ post }: { post: PostType }) {
                 className="w-full h-auto"
               />
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
                 className="absolute top-2 right-2 text-white bg-black bg-opacity-50 hover:bg-opacity-75"
@@ -183,6 +170,6 @@ export default function Post({ post }: { post: PostType }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </motion.article>
   )
 }

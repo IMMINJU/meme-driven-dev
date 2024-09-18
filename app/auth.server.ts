@@ -1,12 +1,11 @@
-// app/utils/auth.server.ts
+import { PostgrestSingleResponse } from "@supabase/supabase-js"
 import { Authenticator } from "remix-auth"
 import { GoogleStrategy } from "remix-auth-google"
 import { supabase } from "./supabase.server"
+import { UserType } from "./types/user"
 import { sessionStorage } from "./utils/session.server"
 
-type User = any
-
-export const authenticator = new Authenticator<User>(sessionStorage)
+export const authenticator = new Authenticator<UserType>(sessionStorage)
 
 const googleStrategy = new GoogleStrategy(
   {
@@ -15,7 +14,7 @@ const googleStrategy = new GoogleStrategy(
     callbackURL: process.env.GOOGLE_CALLBACK_URL!,
   },
   async ({ profile }) => {
-    const { data } = await supabase
+    const { data }: PostgrestSingleResponse<UserType[]> = await supabase
       .from("users")
       .upsert(
         {

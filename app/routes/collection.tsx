@@ -1,14 +1,13 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js"
-import clsx from "clsx"
-import { Clock, Flame, Sun, Terminal } from "lucide-react"
+import { Terminal } from "lucide-react"
 import { authenticator } from "~/auth.server"
 import { FlowerIcon } from "~/components/icons"
+import Post from "~/components/post"
 import { supabase } from "~/supabase.server"
 import { PostType } from "~/types/post"
 import { ActionFunction, LoaderFunction, json } from "@remix-run/node"
 import { useFetcher, useLoaderData } from "@remix-run/react"
 import { useEffect, useRef, useState } from "react"
-import Post from "../components/post"
 
 const pageSize = 10
 
@@ -21,6 +20,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   }: PostgrestSingleResponse<PostType[]> = await supabase
     .from("posts")
     .select("*, user:users(*)", { count: "exact" })
+    .eq("user_id", user?.id)
     .range(0, pageSize - 1)
 
   if (error) {
@@ -49,9 +49,7 @@ export const action: ActionFunction = async ({ request }) => {
   return json({ posts: data })
 }
 
-type SortOrder = "latest" | "allTimePopular" | "todayPopular"
-
-export default function Explore() {
+export default function Collection() {
   const { initialPosts, totalCount } = useLoaderData<{
     initialPosts: PostType[]
     totalCount: number
@@ -62,8 +60,6 @@ export default function Explore() {
   const [page, setPage] = useState(1) // 현재 페이지 상태
 
   const observerRef = useRef<HTMLDivElement | null>(null)
-
-  const [sortOrder, setSortOrder] = useState<SortOrder>("latest")
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -102,45 +98,9 @@ export default function Explore() {
     <div className="max-w-xl mx-auto space-y-8">
       <div className="flex items-center gap-2">
         <Terminal className="w-6 h-6" />
-        <div className="flex w-full flex-row justify-between items-center">
-          <h2 className="text-lg font-bold text-gray-800">Explore</h2>
-          <div className="flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={() => setSortOrder("latest")}
-              className={clsx(
-                "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
-                { "bg-gray-800 text-white": sortOrder === "latest" }
-              )}
-              aria-label="Sort by latest"
-            >
-              <Clock className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder("allTimePopular")}
-              className={clsx(
-                "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
-                { "bg-gray-800 text-white": sortOrder === "allTimePopular" }
-              )}
-              aria-label="Sort by all-time popularity"
-            >
-              <Flame className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder("todayPopular")}
-              className={clsx(
-                "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
-                { "bg-gray-800 text-white": sortOrder === "todayPopular" }
-              )}
-              aria-label="Sort by today's popularity"
-            >
-              <Sun className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+        <h2 className="text-lg font-bold text-gray-800">Collection</h2>
       </div>
+
       {posts.map((post) => (
         <Post key={post.id} post={post} />
       ))}

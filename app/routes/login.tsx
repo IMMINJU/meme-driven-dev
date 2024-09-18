@@ -1,4 +1,3 @@
-// app/routes/auth/google.tsx (action)
 import { authenticator } from "~/auth.server"
 import { ActionFunction } from "@remix-run/node"
 

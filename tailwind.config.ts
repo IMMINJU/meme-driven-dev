@@ -13,10 +13,15 @@ export default {
         "0%": { transform: "scale(0) rotate(0deg)" },
         "10%, 100%": { transform: "scale(1) rotate(360deg)" },
       },
+      spin: {
+        from: { transform: "rotate(0deg)" },
+        to: { transform: "rotate(360deg)" },
+      },
     },
     animation: {
       "arrow-updown": "arrow-updown 0.7s ease-in-out",
       sparkle: "sparkle 3s ease-in-out infinite",
+      spin: "spin 3s linear infinite",
     },
     extend: {
       borderRadius: {

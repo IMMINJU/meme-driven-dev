@@ -1,140 +1,193 @@
+import clsx from "clsx"
 import { AnimatePresence, motion } from "framer-motion"
-import { Upload } from "lucide-react"
+import { LinkIcon } from "lucide-react"
+import { UserType } from "~/types/user"
 import { useFetcher, useLoaderData } from "@remix-run/react"
-import { useRef, useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import {
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { GoogleIcon } from "./icons"
+import ImageUploadField from "./image-upload-field"
+import TagInput from "./tag-input"
+import { Label } from "./ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"
 
-const GoogleLoginArea = () => {
+type UploadFormInputs = {
+  title: string
+  tags: string
+  source?: { type: "link" | "text"; value: string }
+  file: File
+}
+
+type Props = { onClose: () => void }
+
+export default function UploadModal({ onClose }: Props) {
+  const { user } = useLoaderData<{ user: UserType }>()
   const fetcher = useFetcher()
+  const form = useForm<UploadFormInputs>({ shouldUnregister: true })
+  const {
+    control,
+    register,
+    setValue,
+    setError,
+    handleSubmit,
+    formState: { errors },
+  } = form
 
   const handleLogin = () => {
     fetcher.submit(null, { method: "post", action: "/login" })
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, delay: 0.4 }}
-      className="absolute inset-0 flex items-center justify-center z-10 bg-opacity-50 bg-white"
-    >
-      <Button onClick={handleLogin}>
-        <GoogleIcon />
-        <span>Login with Google</span>
-      </Button>
-    </motion.div>
-  )
-}
+  const sourceType = useWatch({ control, name: "source.type" })
 
-type FormInputs = {
-  title: string
-  tags: string
-}
-
-export default function UploadModal() {
-  const { user } = useLoaderData<{ user: any }>()
-  const [image, setImage] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormInputs>({ shouldUnregister: true })
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImage(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+  const onSubmit = handleSubmit(async (data) => {
+    if (data.source?.value && !data.source.type) {
+      return setError("source.type", {})
+    } else {
+      form.clearErrors("source.type")
     }
-  }
 
-  const onSubmit = handleSubmit((data) => {
-    if (image && imagePreview) {
-      const newPost = {
-        imageUrl: imagePreview,
-        title: data.title || data.tags,
-        tags: data.tags.split(",").map((tag) => tag.trim()),
-      }
-      setImage(null)
-      setImagePreview(null)
-      reset()
-    }
+    // const formData = new FormData()
+    // formData.append("file", data.file)
+    // formData.append("title", data.title)
+    // formData.append("tags", data.tags)
+    // formData.append("source", data.source)
+    // await fetcher.submit(formData, { method: "post", action: "/upload" })
+
+    onClose()
+    fetcher.load("/explore")
   })
 
   return (
     <>
-      <DialogContent className="sm:max-w-[425px] bg-white text-gray-800 font-mono">
+      <DialogContent
+        className="sm:max-w-[472px] max-w-md bg-white text-gray-800 border border-gray-200 shadow-lg"
+        aria-describedby="dialog-description"
+      >
         <DialogHeader>
-          <DialogTitle className="text-lg mb-4 text-gray-800">
+          <DialogTitle className="text-gray-900 font-mono">
             New Post
           </DialogTitle>
+          <DialogDescription />
         </DialogHeader>
-        <AnimatePresence>{!user && <GoogleLoginArea />}</AnimatePresence>
+        <AnimatePresence>
+          {!user && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="absolute inset-0 flex items-center justify-center z-10 bg-opacity-50 bg-white"
+            >
+              <Button onClick={handleLogin}>
+                <GoogleIcon />
+                <span>Login with Google</span>
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="aspect-video w-full overflow-hidden rounded-md border border-gray-300 bg-gray-100 flex items-center justify-center cursor-pointer relative transition-all duration-300 ease-in-out hover:bg-gray-200 hover:border-gray-400">
-            {imagePreview ? (
-              <>
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="object-contain rounded-md"
+        <form onSubmit={onSubmit} className="space-y-4 sm:space-y-6">
+          <ImageUploadField form={form} name="file" />
+
+          <div>
+            <Label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Title
+            </Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">
+                $
+              </span>
+              <Input
+                {...register("title", { required: "Title is required" })}
+                placeholder="// Enter title"
+                className={clsx(
+                  "mt-1 pl-7 bg-white border-gray-300 text-gray-800 placeholder-gray-400",
+                  { "border-red-500": errors.title }
+                )}
+              />
+            </div>
+          </div>
+          <div>
+            <Label
+              htmlFor="tags"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Tags
+            </Label>
+            <TagInput
+              form={form}
+              name="tags"
+              placeholder="// Enter tags (comma separated)"
+              className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400"
+            />
+          </div>
+          <div>
+            <Label
+              htmlFor="source"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Source <span className="text-gray-500">(Optional)</span>
+            </Label>
+            <div className="flex mt-1 space-x-2">
+              <Select
+                onValueChange={(value) =>
+                  setValue("source.type", value as "link" | "text")
+                }
+              >
+                <SelectTrigger
+                  className={clsx("w-100", {
+                    "border-red-500": errors.source?.type,
+                  })}
+                >
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Text</SelectItem>
+                  <SelectItem value="link">Link</SelectItem>
+                </SelectContent>
+              </Select>
+              {sourceType === "text" ? (
+                <Input
+                  {...register("source.value", { required: sourceType })}
+                  placeholder="Enter source"
+                  className="flex-1"
                 />
-                <div className="absolute inset-0 bg-white bg-opacity-0 hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                  <p className="text-gray-800 text-sm font-medium opacity-0 hover:opacity-100 transition-opacity duration-300">
-                    Change photo
-                  </p>
+              ) : (
+                <div className="flex flex-1">
+                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
+                    <LinkIcon className="h-4 w-4" />
+                  </span>
+                  <Input
+                    id="source"
+                    type="url"
+                    {...register("source.value", { required: sourceType })}
+                    placeholder="https://example.com"
+                    className="rounded-l-none"
+                  />
                 </div>
-              </>
-            ) : (
-              <div className="text-center p-6">
-                <Upload className="mx-auto h-8 w-8 text-gray-800" />
-                <p className="mt-2 text-sm text-gray-800">
-                  Click to upload photo
-                </p>
-              </div>
+              )}
+            </div>
+            {errors.source && (
+              <p className="text-red-500 text-xs">{errors.source.message}</p>
             )}
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
-          <Input
-            {...register("title", { required: "Title is required" })}
-            placeholder="// Enter title"
-            className="text-sm bg-gray-100 border-gray-300 text-gray-800 placeholder-gray-500"
-          />
-          {errors.title && (
-            <p className="text-red-500 text-xs">{errors.title.message}</p>
-          )}
-          <Input
-            {...register("tags", { required: "Tags are required" })}
-            placeholder="// Enter tags (comma separated)"
-            className="text-sm bg-gray-100 border-gray-300 text-gray-800 placeholder-gray-500"
-          />
-          {errors.tags && (
-            <p className="text-red-500 text-xs">{errors.tags.message}</p>
-          )}
+
           <Button
             type="submit"
             className="w-full bg-gray-800 hover:bg-gray-900 text-white"

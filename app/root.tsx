@@ -1,3 +1,4 @@
+import { LoaderFunction, json } from "@remix-run/node"
 import {
   Links,
   Meta,
@@ -7,6 +8,10 @@ import {
   isRouteErrorResponse,
   useRouteError,
 } from "@remix-run/react"
+import { authenticator } from "./auth.server"
+import Header from "./components/header"
+import Rank from "./components/rank"
+import Sidebar from "./components/sidebar"
 import "./tailwind.css"
 
 export function ErrorBoundary() {
@@ -44,6 +49,11 @@ export function ErrorBoundary() {
   )
 }
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await authenticator.isAuthenticated(request)
+  return json({ user })
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -54,7 +64,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <div className="flex flex-col h-screen bg-gray-50 text-gray-800">
+          <Header />
+
+          <div className="flex-1 overflow-hidden">
+            <div className="max-w-5xl mx-auto h-full flex flex-col md:flex-row">
+              <Sidebar />
+              <main className="flex-1 p-4 overflow-y-auto scrollbar-hide">
+                {children}
+              </main>
+
+              <Rank />
+            </div>
+          </div>
+        </div>
         <ScrollRestoration />
         <Scripts />
       </body>
