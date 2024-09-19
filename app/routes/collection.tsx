@@ -2,6 +2,7 @@ import { PostgrestSingleResponse } from "@supabase/supabase-js"
 import { Terminal } from "lucide-react"
 import { authenticator } from "~/auth.server"
 import { FlowerIcon } from "~/components/icons"
+import MainLayout from "~/components/main-layout"
 import Post from "~/components/post"
 import { supabase } from "~/supabase.server"
 import { PostType } from "~/types/post"
@@ -13,6 +14,10 @@ const pageSize = 10
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request)
+  if (!user) {
+    throw new Response("Not Found", { status: 404 })
+  }
+
   const {
     data: initialPosts,
     error,
@@ -20,7 +25,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   }: PostgrestSingleResponse<PostType[]> = await supabase
     .from("posts")
     .select("*, user:users(*)", { count: "exact" })
-    .eq("user_id", user?.id)
+    .eq("user_id", user.id)
     .range(0, pageSize - 1)
 
   if (error) {
@@ -31,6 +36,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 }
 
 export const action: ActionFunction = async ({ request }) => {
+  const user = await authenticator.isAuthenticated(request)
   const formData = await request.formData()
   const page = Number(formData.get("page"))
 
@@ -39,7 +45,8 @@ export const action: ActionFunction = async ({ request }) => {
 
   const { data, error }: PostgrestSingleResponse<PostType[]> = await supabase
     .from("posts")
-    .select("*")
+    .select("*, user:users(*)", { count: "exact" })
+    .eq("user_id", user?.id)
     .range(from, to)
 
   if (error) {
@@ -95,30 +102,32 @@ export default function Collection() {
   }, [fetcher.data])
 
   return (
-    <div className="max-w-xl mx-auto space-y-8">
-      <div className="flex items-center gap-2">
-        <Terminal className="w-6 h-6" />
-        <h2 className="text-lg font-bold text-gray-800">Collection</h2>
+    <MainLayout>
+      <div className="max-w-xl mx-auto space-y-8">
+        <div className="flex items-center gap-2">
+          <Terminal className="w-6 h-6" />
+          <h2 className="text-lg font-bold text-gray-800">Collection</h2>
+        </div>
+
+        {posts.map((post) => (
+          <Post key={post.id} post={post} />
+        ))}
+
+        {/* 로딩 중일 때 표시 */}
+        {fetcher.state === "submitting" && (
+          <div className="flex items-center justify-center">
+            <FlowerIcon className="animate-spin" />
+          </div>
+        )}
+
+        <div ref={observerRef} className="h-10" />
+
+        {!hasMore && (
+          <div className="flex items-center justify-center">
+            <FlowerIcon />
+          </div>
+        )}
       </div>
-
-      {posts.map((post) => (
-        <Post key={post.id} post={post} />
-      ))}
-
-      {/* 로딩 중일 때 표시 */}
-      {fetcher.state === "submitting" && (
-        <div className="flex items-center justify-center">
-          <FlowerIcon className="animate-spin" />
-        </div>
-      )}
-
-      <div ref={observerRef} className="h-10" />
-
-      {!hasMore && (
-        <div className="flex items-center justify-center">
-          <FlowerIcon />
-        </div>
-      )}
-    </div>
+    </MainLayout>
   )
 }

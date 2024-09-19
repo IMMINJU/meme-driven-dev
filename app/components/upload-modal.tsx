@@ -34,7 +34,8 @@ type UploadFormInputs = {
 type Props = { onClose: () => void }
 
 export default function UploadModal({ onClose }: Props) {
-  const { user } = useLoaderData<{ user: UserType }>()
+  const data = useLoaderData<{ user?: UserType }>()
+  const user = data?.user
   const fetcher = useFetcher()
   const form = useForm<UploadFormInputs>({ shouldUnregister: true })
   const {

@@ -3,6 +3,7 @@ import clsx from "clsx"
 import { Clock, Flame, Sun, Terminal } from "lucide-react"
 import { authenticator } from "~/auth.server"
 import { FlowerIcon } from "~/components/icons"
+import MainLayout from "~/components/main-layout"
 import { supabase } from "~/supabase.server"
 import { PostType } from "~/types/post"
 import { ActionFunction, LoaderFunction, json } from "@remix-run/node"
@@ -99,66 +100,68 @@ export default function Explore() {
   }, [fetcher.data])
 
   return (
-    <div className="max-w-xl mx-auto space-y-8">
-      <div className="flex items-center gap-2">
-        <Terminal className="w-6 h-6" />
-        <div className="flex w-full flex-row justify-between items-center">
-          <h2 className="text-lg font-bold text-gray-800">Explore</h2>
-          <div className="flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={() => setSortOrder("latest")}
-              className={clsx(
-                "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
-                { "bg-gray-800 text-white": sortOrder === "latest" }
-              )}
-              aria-label="Sort by latest"
-            >
-              <Clock className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder("allTimePopular")}
-              className={clsx(
-                "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
-                { "bg-gray-800 text-white": sortOrder === "allTimePopular" }
-              )}
-              aria-label="Sort by all-time popularity"
-            >
-              <Flame className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder("todayPopular")}
-              className={clsx(
-                "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
-                { "bg-gray-800 text-white": sortOrder === "todayPopular" }
-              )}
-              aria-label="Sort by today's popularity"
-            >
-              <Sun className="h-4 w-4" />
-            </button>
+    <MainLayout>
+      <div className="max-w-xl mx-auto space-y-8">
+        <div className="flex items-center gap-2">
+          <Terminal className="w-6 h-6" />
+          <div className="flex w-full flex-row justify-between items-center">
+            <h2 className="text-lg font-bold text-gray-800">Explore</h2>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => setSortOrder("latest")}
+                className={clsx(
+                  "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
+                  { "bg-gray-800 text-white": sortOrder === "latest" }
+                )}
+                aria-label="Sort by latest"
+              >
+                <Clock className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortOrder("allTimePopular")}
+                className={clsx(
+                  "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
+                  { "bg-gray-800 text-white": sortOrder === "allTimePopular" }
+                )}
+                aria-label="Sort by all-time popularity"
+              >
+                <Flame className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortOrder("todayPopular")}
+                className={clsx(
+                  "flex items-center justify-center w-8 h-8 rounded-full transition duration-150 ease-in-out bg-gray-200 text-gray-600 hover:bg-gray-300",
+                  { "bg-gray-800 text-white": sortOrder === "todayPopular" }
+                )}
+                aria-label="Sort by today's popularity"
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
+        {posts.map((post) => (
+          <Post key={post.id} post={post} />
+        ))}
+
+        {/* 로딩 중일 때 표시 */}
+        {fetcher.state === "submitting" && (
+          <div className="flex items-center justify-center">
+            <FlowerIcon className="animate-spin" />
+          </div>
+        )}
+
+        <div ref={observerRef} className="h-10" />
+
+        {!hasMore && (
+          <div className="flex items-center justify-center">
+            <FlowerIcon />
+          </div>
+        )}
       </div>
-      {posts.map((post) => (
-        <Post key={post.id} post={post} />
-      ))}
-
-      {/* 로딩 중일 때 표시 */}
-      {fetcher.state === "submitting" && (
-        <div className="flex items-center justify-center">
-          <FlowerIcon className="animate-spin" />
-        </div>
-      )}
-
-      <div ref={observerRef} className="h-10" />
-
-      {!hasMore && (
-        <div className="flex items-center justify-center">
-          <FlowerIcon />
-        </div>
-      )}
-    </div>
+    </MainLayout>
   )
 }

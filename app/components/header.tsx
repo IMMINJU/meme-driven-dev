@@ -1,20 +1,15 @@
 import clsx from "clsx"
-import {
-  Code,
-  Compass,
-  FolderHeart,
-  Menu,
-  Trophy,
-  Upload,
-  X,
-} from "lucide-react"
-import { Link } from "@remix-run/react"
+import { Code, Compass, FolderHeart, Menu, Trophy, X } from "lucide-react"
+import { UserType } from "~/types/user"
+import { Link, useLoaderData } from "@remix-run/react"
 import { useState } from "react"
 import { UploadIcon } from "./icons"
 import ModalButton from "./modal-button"
 import UploadModal from "./upload-modal"
 
 export default function Header() {
+  const data = useLoaderData<{ user?: UserType }>()
+  const user = data?.user
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isHovered, setIsHovered] = useState<{
     compass: boolean
@@ -135,13 +130,15 @@ export default function Header() {
               <Trophy className="h-4 w-4 mr-2" />
               Tournament
             </Link>
-            <Link
-              to="collection"
-              className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
-            >
-              <FolderHeart className="h-4 w-4 mr-2" />
-              Collection
-            </Link>
+            {user && (
+              <Link
+                to="collection"
+                className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
+              >
+                <FolderHeart className="h-4 w-4 mr-2" />
+                Collection
+              </Link>
+            )}
           </nav>
         </div>
       )}

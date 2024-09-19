@@ -1,11 +1,14 @@
 import clsx from "clsx"
 import { Compass, Sparkles, Trophy } from "lucide-react"
-import { Link } from "@remix-run/react"
+import { UserType } from "~/types/user"
+import { Link, useLoaderData } from "@remix-run/react"
 import { useState } from "react"
 import { FolderIcon } from "./icons"
 
 type MenuKey = { explore: boolean; tournament: boolean; collection: boolean }
 const Sidebar = () => {
+  const data = useLoaderData<{ user?: UserType }>()
+  const user = data?.user
   const [isHovered, setIsHovered] = useState<MenuKey>({
     explore: false,
     tournament: false,
@@ -45,11 +48,15 @@ const Sidebar = () => {
         </>
       ),
     },
-    {
-      name: "Collection",
-      to: "collection",
-      icon: <FolderIcon animate={isHovered.collection} />,
-    },
+    ...(user
+      ? [
+          {
+            name: "Collection",
+            to: "collection" as const,
+            icon: <FolderIcon animate={isHovered.collection} />,
+          },
+        ]
+      : []),
   ]
 
   return (
