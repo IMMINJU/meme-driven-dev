@@ -1,7 +1,9 @@
 import clsx from "clsx"
 import { Clock, Flame, Sun, Terminal } from "lucide-react"
+import { authenticator } from "~/auth.server"
 import MainLayout from "~/components/main-layout"
-import WorldCup from "~/components/world-cup"
+import WorldCup from "~/components/tournament"
+import { LoaderFunction, json } from "@remix-run/node"
 import { useState } from "react"
 
 const tournaments = [
@@ -10,7 +12,8 @@ const tournaments = [
     title: "Summer Chess Championship",
     createdAt: "2023-05-15",
     startDate: "2023-06-15",
-    thumbnail: "/placeholder.svg?height=150&width=300&text=Chess",
+    thumbnail:
+      "https://i.kym-cdn.com/entries/icons/original/000/028/021/work.jpg",
     tags: ["Chess", "Strategy"],
     participantCount: 64,
   },
@@ -19,7 +22,9 @@ const tournaments = [
     title: "Rocket League World Cup",
     createdAt: "2023-05-20",
     startDate: "2023-07-01",
-    thumbnail: "/placeholder.svg?height=150&width=300&text=Rocket+League",
+    thumbnail:
+      "https://i.kym-cdn.com/entries/icons/original/000/028/021/work.jpg",
+
     tags: ["E-Sports", "Racing"],
     participantCount: 32,
   },
@@ -28,13 +33,20 @@ const tournaments = [
     title: "Global Poker Series",
     createdAt: "2023-05-25",
     startDate: "2023-06-30",
-    thumbnail: "/placeholder.svg?height=150&width=300&text=Poker",
+    thumbnail:
+      "https://i.kym-cdn.com/entries/icons/original/000/028/021/work.jpg",
     tags: ["Poker", "Cards"],
     participantCount: 128,
   },
 ]
 
 type SortOrder = "latest" | "allTimePopular" | "todayPopular"
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await authenticator.isAuthenticated(request)
+
+  return json({ user })
+}
 
 export default function Tournament() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("latest")

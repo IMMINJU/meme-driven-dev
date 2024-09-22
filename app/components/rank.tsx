@@ -1,31 +1,105 @@
-import { Code } from "lucide-react"
+import { ThumbsUp, Users } from "lucide-react"
+import { useEffect, useState } from "react"
+
+type Project = {
+  id: number
+  title: string
+  image: string
+  tags: string[]
+  likes: number
+  todayLikes: number
+  author: string
+  date: Date
+  source: string
+}
+
+type PopularPost = {
+  id: number
+  title: string
+  likes: number
+}
+
+type Tournament = {
+  id: number
+  title: string
+  participants: number
+}
 
 const Rank = () => {
+  const [popularPosts, setPopularPosts] = useState<PopularPost[]>([])
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
+
+  useEffect(() => {
+    const initialPopularPosts: PopularPost[] = [
+      { id: 1, title: "10 React Hooks You Must Know", likes: 230 },
+      { id: 2, title: "The Future of JavaScript", likes: 185 },
+      { id: 3, title: "Building Scalable Node.js Apps", likes: 162 },
+    ]
+    setPopularPosts(initialPopularPosts)
+
+    const initialTournaments: Tournament[] = [
+      { id: 1, title: "React Code Challenge", participants: 256 },
+      { id: 2, title: "Vue.js Hackathon", participants: 128 },
+      { id: 3, title: "JavaScript Algorithms", participants: 512 },
+    ]
+    setTournaments(initialTournaments)
+  }, [])
+
   return (
-    <aside className="hidden md:block w-full md:w-48 p-4 overflow-y-auto md:overflow-y-visible scrollbar-hide border-t md:border-t-0 border-gray-200">
-      <h2 className="text-base font-semibold text-gray-800 mb-3">
-        Top Developers
-      </h2>
-      <ol className="space-y-2">
-        {[
-          "@alice_dev",
-          "@bob_coder",
-          "@charlie_programmer",
-          "@david_hacker",
-          "@eve_engineer",
-        ].map((user, index) => (
-          <li
-            key={user}
-            className="flex items-center space-x-2 p-2 bg-gray-100 rounded"
-          >
-            <Code className="h-4 w-4 text-gray-600" />
-            <span className="text-xs text-gray-800 font-medium">
-              {index + 1}.
-            </span>
-            <span className="text-xs text-gray-800 font-medium">{user}</span>
-          </li>
-        ))}
-      </ol>
+    <aside className="hidden md:block w-48 p-4 overflow-y-auto hide-scrollbar border-t md:border-t-0 md:border-l border-gray-200">
+      <div className="space-y-6">
+        {/* Popular Posts */}
+        <section>
+          <h2 className="text-sm font-semibold text-gray-800 mb-2">
+            Popular Posts
+          </h2>
+          <ul className="space-y-2">
+            {popularPosts.map((post) => (
+              <li
+                key={post.id}
+                className="text-xs flex items-center justify-between"
+              >
+                <a
+                  href="#"
+                  className="hover:text-gray-600 transition duration-150 ease-in-out truncate flex-1"
+                >
+                  {post.title}
+                </a>
+                <span className="flex items-center text-gray-500 ml-2">
+                  <ThumbsUp className="h-3 w-3 mr-1" />
+                  {post.likes}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Tournaments */}
+        <section>
+          <h2 className="text-sm font-semibold text-gray-800 mb-2">
+            Tournaments
+          </h2>
+          <ul className="space-y-2">
+            {tournaments.map((tournament) => (
+              <li
+                key={tournament.id}
+                className="text-xs flex items-center justify-between"
+              >
+                <a
+                  href="#"
+                  className="hover:text-gray-600 transition duration-150 ease-in-out truncate flex-1"
+                >
+                  {tournament.title}
+                </a>
+                <span className="flex items-center text-gray-500 ml-2">
+                  <Users className="h-3 w-3 mr-1" />
+                  {tournament.participants}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </aside>
   )
 }

@@ -191,6 +191,7 @@ export default function UploadModal({ onClose }: Props) {
 
           <Button
             type="submit"
+            disabled
             className="w-full bg-gray-800 hover:bg-gray-900 text-white"
           >
             Execute Post()

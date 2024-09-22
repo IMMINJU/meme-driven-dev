@@ -31,21 +31,24 @@ export default function LightThemeTournament({
   items = [
     {
       id: 1,
-      imageUrl: "/placeholder.svg?height=800&width=1200",
+      imageUrl:
+        "https://i.kym-cdn.com/entries/icons/original/000/028/021/work.jpg",
       title: "Project_A",
       description: "Brand Identity Design",
       tags: ["Branding", "Logo"],
     },
     {
       id: 2,
-      imageUrl: "/placeholder.svg?height=800&width=1200",
+      imageUrl:
+        "https://i.kym-cdn.com/entries/icons/original/000/028/021/work.jpg",
       title: "Project_B",
       description: "Website UI/UX Design",
       tags: ["Web", "UI/UX"],
     },
     {
       id: 3,
-      imageUrl: "/placeholder.svg?height=800&width=1200",
+      imageUrl:
+        "https://i.kym-cdn.com/entries/icons/original/000/028/021/work.jpg",
       title: "Project_C",
       description: "Mobile App Design",
       tags: ["Mobile", "App"],

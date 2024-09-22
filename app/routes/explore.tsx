@@ -90,7 +90,7 @@ export default function Explore() {
 
   useEffect(() => {
     if (fetcher.data && fetcher.data.posts) {
-      setPosts((prevPosts) => [...prevPosts, ...fetcher.data.posts])
+      setPosts((prevPosts) => [...prevPosts, ...(fetcher.data?.posts || [])])
       setPage((prevPage) => prevPage + 1)
 
       if (fetcher.data.posts.length === 0) {
