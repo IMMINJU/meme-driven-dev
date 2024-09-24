@@ -1,9 +1,8 @@
 import clsx from "clsx"
 import { AnimatePresence, motion } from "framer-motion"
-import { LinkIcon } from "lucide-react"
 import { UserType } from "~/types/user"
-import { useFetcher, useLoaderData } from "@remix-run/react"
-import { useForm, useWatch } from "react-hook-form"
+import { Form, useFetcher, useLoaderData, useNavigate } from "@remix-run/react"
+import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import {
   DialogContent,
@@ -16,19 +15,11 @@ import { GoogleIcon } from "./icons"
 import ImageUploadField from "./image-upload-field"
 import TagInput from "./tag-input"
 import { Label } from "./ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select"
 
 type UploadFormInputs = {
   title: string
   tags: string
-  source?: { type: "link" | "text"; value: string }
-  file: File
+  file: File[]
 }
 
 type Props = { onClose: () => void }
@@ -37,12 +28,10 @@ export default function UploadModal({ onClose }: Props) {
   const data = useLoaderData<{ user?: UserType }>()
   const user = data?.user
   const fetcher = useFetcher()
+  const navigate = useNavigate()
   const form = useForm<UploadFormInputs>({ shouldUnregister: true })
   const {
-    control,
     register,
-    setValue,
-    setError,
     handleSubmit,
     formState: { errors },
   } = form
@@ -51,24 +40,20 @@ export default function UploadModal({ onClose }: Props) {
     fetcher.submit(null, { method: "post", action: "/login" })
   }
 
-  const sourceType = useWatch({ control, name: "source.type" })
-
   const onSubmit = handleSubmit(async (data) => {
-    if (data.source?.value && !data.source.type) {
-      return setError("source.type", {})
+    const formData = new FormData()
+    formData.append("tags", JSON.stringify(data.tags))
+    formData.append("title", data.title)
+    formData.append("file", data.file[0])
+    formData.append("user_id", user?.id || "")
+    const response = await fetch("/post", { method: "post", body: formData })
+
+    if (response.ok) {
+      onClose()
+      navigate("/explore")
     } else {
-      form.clearErrors("source.type")
+      console.error("Error submitting the post")
     }
-
-    // const formData = new FormData()
-    // formData.append("file", data.file)
-    // formData.append("title", data.title)
-    // formData.append("tags", data.tags)
-    // formData.append("source", data.source)
-    // await fetcher.submit(formData, { method: "post", action: "/upload" })
-
-    onClose()
-    fetcher.load("/explore")
   })
 
   return (
@@ -100,7 +85,7 @@ export default function UploadModal({ onClose }: Props) {
           )}
         </AnimatePresence>
 
-        <form onSubmit={onSubmit} className="space-y-4 sm:space-y-6">
+        <Form onSubmit={onSubmit} className="space-y-4 sm:space-y-6">
           <ImageUploadField form={form} name="file" />
 
           <div>
@@ -138,65 +123,15 @@ export default function UploadModal({ onClose }: Props) {
               className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400"
             />
           </div>
-          <div>
-            <Label
-              htmlFor="source"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Source <span className="text-gray-500">(Optional)</span>
-            </Label>
-            <div className="flex mt-1 space-x-2">
-              <Select
-                onValueChange={(value) =>
-                  setValue("source.type", value as "link" | "text")
-                }
-              >
-                <SelectTrigger
-                  className={clsx("w-100", {
-                    "border-red-500": errors.source?.type,
-                  })}
-                >
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="link">Link</SelectItem>
-                </SelectContent>
-              </Select>
-              {sourceType === "text" ? (
-                <Input
-                  {...register("source.value", { required: sourceType })}
-                  placeholder="Enter source"
-                  className="flex-1"
-                />
-              ) : (
-                <div className="flex flex-1">
-                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                    <LinkIcon className="h-4 w-4" />
-                  </span>
-                  <Input
-                    id="source"
-                    type="url"
-                    {...register("source.value", { required: sourceType })}
-                    placeholder="https://example.com"
-                    className="rounded-l-none"
-                  />
-                </div>
-              )}
-            </div>
-            {errors.source && (
-              <p className="text-red-500 text-xs">{errors.source.message}</p>
-            )}
-          </div>
 
           <Button
             type="submit"
-            disabled
+            disabled={!user}
             className="w-full bg-gray-800 hover:bg-gray-900 text-white"
           >
             Execute Post()
           </Button>
-        </form>
+        </Form>
       </DialogContent>
     </>
   )

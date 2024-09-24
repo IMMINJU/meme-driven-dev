@@ -52,7 +52,7 @@ export default function Tournament() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("latest")
   return (
     <MainLayout>
-      <div className="max-w-xl mx-auto space-y-8">
+      <div className="max-w-lg mx-auto space-y-8">
         <div className="flex items-center gap-2">
           <Terminal className="w-6 h-6" />
           <div className="flex w-full flex-row justify-between items-center">

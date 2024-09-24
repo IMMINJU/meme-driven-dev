@@ -5,7 +5,7 @@ import Sidebar from "./sidebar"
 
 const MainLayout: React.FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div className="flex flex-col h-screen bg-gray-50 text-gray-800">
+    <div className="flex flex-col h-screen text-gray-800 text-sm">
       <Header />
 
       <div className="flex-1 overflow-hidden">

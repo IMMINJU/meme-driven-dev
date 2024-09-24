@@ -1,13 +1,17 @@
+import { motion } from "framer-motion"
 import { Calendar, ChevronRight, Flag, Users } from "lucide-react"
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 
 export default function Tournament({ tournament }) {
+  const MotionCard = motion(Card)
   return (
-    <Card
-      key={tournament.id}
-      className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 bg-gray-50"
+    <MotionCard
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 100 }}
+      className="rounded-sm overflow-hidden shadow-none hover:shadow-md transition-shadow duration-300 bg-white"
     >
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold">
@@ -28,7 +32,7 @@ export default function Tournament({ tournament }) {
         <img
           src={tournament.thumbnail}
           alt={tournament.title}
-          className="w-full h-40 object-cover rounded-md mb-3"
+          className="w-full h-40 object-cover rounded-sm mb-3"
         />
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-wrap gap-1">
@@ -62,6 +66,6 @@ export default function Tournament({ tournament }) {
           </Button>
         </div>
       </CardContent>
-    </Card>
+    </MotionCard>
   )
 }

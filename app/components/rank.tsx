@@ -1,17 +1,6 @@
 import { ThumbsUp, Users } from "lucide-react"
+import { Link } from "@remix-run/react"
 import { useEffect, useState } from "react"
-
-type Project = {
-  id: number
-  title: string
-  image: string
-  tags: string[]
-  likes: number
-  todayLikes: number
-  author: string
-  date: Date
-  source: string
-}
 
 type PopularPost = {
   id: number
@@ -46,7 +35,7 @@ const Rank = () => {
   }, [])
 
   return (
-    <aside className="hidden md:block w-48 p-4 overflow-y-auto hide-scrollbar border-t md:border-t-0 md:border-l border-gray-200">
+    <aside className="hidden md:block w-48 p-4 overflow-y-auto scrollbar-hide border-t md:border-t-0 md:border-l border-gray-200">
       <div className="space-y-6">
         {/* Popular Posts */}
         <section>
@@ -59,12 +48,12 @@ const Rank = () => {
                 key={post.id}
                 className="text-xs flex items-center justify-between"
               >
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="hover:text-gray-600 transition duration-150 ease-in-out truncate flex-1"
                 >
                   {post.title}
-                </a>
+                </Link>
                 <span className="flex items-center text-gray-500 ml-2">
                   <ThumbsUp className="h-3 w-3 mr-1" />
                   {post.likes}
@@ -85,12 +74,12 @@ const Rank = () => {
                 key={tournament.id}
                 className="text-xs flex items-center justify-between"
               >
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="hover:text-gray-600 transition duration-150 ease-in-out truncate flex-1"
                 >
                   {tournament.title}
-                </a>
+                </Link>
                 <span className="flex items-center text-gray-500 ml-2">
                   <Users className="h-3 w-3 mr-1" />
                   {tournament.participants}

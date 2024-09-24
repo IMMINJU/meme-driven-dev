@@ -15,6 +15,7 @@ const pageSize = 10
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request)
+  const env = { SUPABASE_BUCKET_URL: process.env.SUPABASE_BUCKET_URL }
   const {
     data: initialPosts,
     error,
@@ -25,10 +26,10 @@ export const loader: LoaderFunction = async ({ request }) => {
     .range(0, pageSize - 1)
 
   if (error) {
-    return json({ user, initialPosts: [] })
+    return json({ user, initialPosts: [], ...env })
   }
 
-  return json({ user, initialPosts, totalCount: count })
+  return json({ user, initialPosts, totalCount: count, ...env })
 }
 
 export const action: ActionFunction = async ({ request }) => {
@@ -42,6 +43,7 @@ export const action: ActionFunction = async ({ request }) => {
     .from("posts")
     .select("*")
     .range(from, to)
+    .order("created_at", { ascending: false })
 
   if (error) {
     return json({ posts: [] })
@@ -60,7 +62,7 @@ export default function Explore() {
   const fetcher = useFetcher<{ posts: PostType[] }>()
   const [posts, setPosts] = useState(initialPosts)
   const [hasMore, setHasMore] = useState(posts.length < totalCount)
-  const [page, setPage] = useState(1) // 현재 페이지 상태
+  const [page, setPage] = useState(1)
 
   const observerRef = useRef<HTMLDivElement | null>(null)
 
@@ -101,7 +103,7 @@ export default function Explore() {
 
   return (
     <MainLayout>
-      <div className="max-w-xl mx-auto space-y-8">
+      <div className="max-w-lg mx-auto space-y-8">
         <div className="flex items-center gap-2">
           <Terminal className="w-6 h-6" />
           <div className="flex w-full flex-row justify-between items-center">

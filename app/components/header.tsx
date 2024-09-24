@@ -1,15 +1,37 @@
 import clsx from "clsx"
-import { Code, Compass, FolderHeart, Menu, Trophy, X } from "lucide-react"
+import {
+  Compass,
+  FolderHeart,
+  LogOut,
+  Menu,
+  Settings,
+  Terminal,
+  Trophy,
+  X,
+} from "lucide-react"
 import { UserType } from "~/types/user"
 import { Link, useLoaderData } from "@remix-run/react"
 import { useState } from "react"
 import { UploadIcon } from "./icons"
 import ModalButton from "./modal-button"
+import SettingModal from "./setting-modal"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { Button } from "./ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
 import UploadModal from "./upload-modal"
 
 export default function Header() {
   const data = useLoaderData<{ user?: UserType }>()
   const user = data?.user
+  const [open, setModalVisible] = useState(false)
+
+  const showModal = () => setModalVisible(true)
+  const closeModal = () => setModalVisible(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isHovered, setIsHovered] = useState<{
     compass: boolean
@@ -25,8 +47,10 @@ export default function Header() {
       <header className="sticky top-0 z-50  border-gray-200">
         <div className="max-w-5xl mx-auto flex items-center justify-between p-3">
           <div className="flex items-center space-x-2">
-            <Code className="h-6 w-6 text-gray-800" />
-            <h1 className="text-xl font-semibold text-gray-800">DevShots</h1>
+            <Terminal className="h-6 w-6 text-gray-800" />
+            <h1 className="text-xl font-mono font-semibold text-gray-800">
+              OddDevs 🎭
+            </h1>
           </div>
           <div className="flex gap-x-4 items-center">
             <ModalButton
@@ -49,15 +73,15 @@ export default function Header() {
                 <UploadIcon animate={isHovered.upload} />
               </div>
             </ModalButton>
-            {/* {user ? (
+            {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     type="button"
                     variant="ghost"
-                    className="relative p-0"
+                    className="relative p-0 rounded-full overflow-hidden h-8 max-w-8 w-8"
                   >
-                    <Avatar className="rounded-full h-8 max-w-8 w-8">
+                    <Avatar>
                       <AvatarImage src={user.photo} alt={`@${user.name}`} />
                       <AvatarFallback>
                         {user.name[0].toUpperCase()}
@@ -71,21 +95,15 @@ export default function Header() {
                   align="end"
                   forceMount
                 >
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuItem>
                     <Folder className="mr-2 h-4 w-4" />
                     Collection
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => {}}>
-                    <ModalButton
-                      variant="ghost"
-                      className="p-0 h-auto font-normal"
-                      modalContent={(closeModal) => (
-                        <UploadModal onClose={closeModal} />
-                      )}
-                    >
+                  </DropdownMenuItem> */}
+                  <DropdownMenuItem onClick={showModal}>
+                    <Button variant="ghost" className="p-0 h-auto font-normal">
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
-                    </ModalButton>
+                    </Button>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => {}}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -95,7 +113,7 @@ export default function Header() {
               </DropdownMenu>
             ) : (
               <div className="w-8" />
-            )} */}
+            )}
 
             <button
               type="button"
@@ -142,6 +160,8 @@ export default function Header() {
           </nav>
         </div>
       )}
+
+      {open && <SettingModal user={user} onClose={closeModal} />}
     </>
   )
 }

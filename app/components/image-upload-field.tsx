@@ -1,7 +1,7 @@
 import clsx from "clsx"
 import { Upload } from "lucide-react"
-import { useRef, useState } from "react"
-import { FieldValues, Path, UseFormReturn } from "react-hook-form"
+import { useState } from "react"
+import { FieldValues, Path, PathValue, UseFormReturn } from "react-hook-form"
 import { Input } from "./ui/input"
 
 type Props<T extends FieldValues> = { form: UseFormReturn<T>; name: Path<T> }
@@ -9,15 +9,18 @@ type Props<T extends FieldValues> = { form: UseFormReturn<T>; name: Path<T> }
 const ImageUploadField = <T extends FieldValues>({ form, name }: Props<T>) => {
   const [preview, setPreview] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const inputRef = useRef<HTMLInputElement | null>(null)
   const {
     register,
     formState: { errors },
+    setValue,
   } = form
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (preview) {
+        URL.revokeObjectURL(preview)
+      }
       const previewUrl = URL.createObjectURL(file)
       setPreview(previewUrl)
     }
@@ -45,14 +48,21 @@ const ImageUploadField = <T extends FieldValues>({ form, name }: Props<T>) => {
     e.stopPropagation()
     setIsDragging(false)
     const file = e.dataTransfer.files?.[0]
-    const previewUrl = URL.createObjectURL(file)
-    setPreview(previewUrl)
+    if (file) {
+      if (preview) {
+        URL.revokeObjectURL(preview)
+      }
+      const previewUrl = URL.createObjectURL(file)
+      setPreview(previewUrl)
+
+      setValue(name, e.dataTransfer.files as PathValue<T, Path<T>>)
+    }
   }
 
   return (
     <div
       className={clsx(
-        "relative w-full bg-gray-50 rounded-lg cursor-pointer transition-all duration-300 ease-in-out hover:bg-gray-100 hover:border-gray-400 aspect-video sm:aspect-square border-2 border-dashed border-gray-300",
+        "relative w-full bg-gray-50 rounded-lg cursor-pointer transition-all duration-300 ease-in-out hover:bg-gray-100 hover:border-gray-400 aspect-video border-2 border-dashed border-gray-300",
         {
           "bg-gray-100 border-2 border-gray-500": isDragging,
           "border-red-500": errors[name],
@@ -88,10 +98,6 @@ const ImageUploadField = <T extends FieldValues>({ form, name }: Props<T>) => {
         type="file"
         accept="image/*"
         {...register(name, { onChange: handleFileChange, required: true })}
-        ref={(e) => {
-          register(name).ref(e)
-          inputRef.current = e
-        }}
         className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
       />
     </div>

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { Calendar, Link, Tag, X } from "lucide-react"
 import { PostType } from "~/types/post"
+import { useLoaderData } from "@remix-run/react"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import ModalButton from "./modal-button"
@@ -11,6 +12,9 @@ interface Props {
 }
 
 export default function Post({ post }: Props) {
+  const { SUPABASE_BUCKET_URL } = useLoaderData<{
+    SUPABASE_BUCKET_URL: string
+  }>()
   const [fullImageSrc, setFullImageSrc] = useState<string | null>(null)
   const imageRefs = useRef<{ [key: string]: HTMLImageElement | null }>({})
 
@@ -70,11 +74,13 @@ export default function Post({ post }: Props) {
       <button
         type="button"
         className="relative w-full"
-        onClick={() => handleImageClick(post.id, post.image)}
+        onClick={() =>
+          handleImageClick(post.id, `${SUPABASE_BUCKET_URL}/${post.image}`)
+        }
       >
         <img
           ref={(el) => (imageRefs.current[post.id] = el)}
-          src={post.image}
+          src={`${SUPABASE_BUCKET_URL}/${post.image}`}
           alt={post.title || `Meme ${post.id}`}
           className="w-full h-auto"
         />
@@ -99,9 +105,11 @@ export default function Post({ post }: Props) {
             </span>
             <span>{24} Likes</span>
           </div>
-          <div className="flex items-center">
-            <span className="font-medium text-gray-800">@{post.user.name}</span>
-          </div>
+          {/* <div className="flex items-center">
+            <span className="font-medium text-gray-800">
+              @{post.user.name}
+            </span>
+          </div> */}
         </div>
         <div className="flex items-center justify-between text-xs text-gray-500">
           {post.source?.type === "link" ? (

@@ -22,14 +22,16 @@ const Sidebar = () => {
     name: string
     to: keyof MenuKey
     icon: JSX.Element
+    emoji?: string
   }[] = [
     {
       name: "Explore",
       to: "explore",
+      emoji: "🌍",
       icon: (
         <Compass
           className={clsx(
-            "w-5 h-5 transition-transform duration-500 ease-in-out",
+            "w-4 h-4 transition-transform duration-500 ease-in-out",
             { "-rotate-90": isHovered.explore }
           )}
         />
@@ -38,9 +40,10 @@ const Sidebar = () => {
     {
       name: "Tournament",
       to: "tournament",
+      emoji: "🏆",
       icon: (
         <>
-          <Trophy className="h-5 w-5" />
+          <Trophy className="h-4 w-4" />
           <Sparkles
             className="absolute -top-1 -right-1 w-3 h-3 transition-all animate-sparkle"
             aria-hidden="true"
@@ -61,7 +64,7 @@ const Sidebar = () => {
 
   return (
     <nav className="hidden md:block w-full md:w-48 p-4 space-y-4 overflow-y-visible border-b-0 border-gray-200">
-      <h2 className="text-base font-semibold text-gray-800">Menu</h2>
+      <h2 className="text-base font-semibold text-gray-800">Menu 📋</h2>
       <ul className="space-y-2">
         {menus.map((item) => (
           <li key={item.name} className="group">
@@ -74,7 +77,7 @@ const Sidebar = () => {
               <span className="relative p-1 bg-gray-200 rounded group-hover:bg-gray-300 transition duration-150 ease-in-out">
                 {item.icon}
               </span>
-              <span className="text-sm font-medium">{item.name}</span>
+              <span className="text-xs font-medium">{item.name}</span>
             </Link>
           </li>
         ))}
