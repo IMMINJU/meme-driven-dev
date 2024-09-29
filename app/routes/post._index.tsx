@@ -1,5 +1,7 @@
 import { supabase } from "~/supabase.server"
 import { ActionFunction, redirect } from "@remix-run/node"
+import { useNavigate } from "@remix-run/react"
+import { useEffect } from "react"
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
@@ -41,4 +43,14 @@ export const action: ActionFunction = async ({ request }) => {
 
     return redirect("/explore")
   }
+}
+
+export default function Post() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    navigate("/explore", { replace: true })
+  }, [navigate])
+
+  return null
 }
