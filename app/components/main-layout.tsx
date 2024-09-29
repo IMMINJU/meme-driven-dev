@@ -1,4 +1,5 @@
 import { PropsWithChildren, useState } from "react"
+import ContactModal from "./contact-modal"
 import Header from "./header"
 import Rank from "./rank"
 import Sidebar from "./sidebar"
@@ -18,6 +19,9 @@ const MainLayout: React.FC<PropsWithChildren> = ({ children }) => {
 
           <Rank />
         </div>
+      </div>
+      <div className="fixed bottom-4 right-4">
+        <ContactModal />
       </div>
     </div>
   )

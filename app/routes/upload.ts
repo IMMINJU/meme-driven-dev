@@ -1,5 +1,5 @@
 import { supabase } from "~/supabase.server"
-import { ActionFunction, json } from "@remix-run/node"
+import { ActionFunction, LoaderFunction, json, redirect } from "@remix-run/node"
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
@@ -36,4 +36,8 @@ export const action: ActionFunction = async ({ request }) => {
   }
 
   return
+}
+
+export const loader: LoaderFunction = () => {
+  return redirect("/explore")
 }
