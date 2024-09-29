@@ -8,6 +8,7 @@ import {
   isRouteErrorResponse,
   useRouteError,
 } from "@remix-run/react"
+import { Toaster } from "react-hot-toast"
 import { authenticator } from "./auth.server"
 import "./tailwind.css"
 
@@ -61,6 +62,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        <Toaster />
         {children}
         <ScrollRestoration />
         <Scripts />

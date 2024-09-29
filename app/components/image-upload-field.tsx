@@ -62,7 +62,7 @@ const ImageUploadField = <T extends FieldValues>({ form, name }: Props<T>) => {
   return (
     <div
       className={clsx(
-        "relative w-full bg-gray-50 rounded-lg cursor-pointer transition-all duration-300 ease-in-out hover:bg-gray-100 hover:border-gray-400 aspect-video border-2 border-dashed border-gray-300",
+        "relative w-full bg-yellow-100 border-2 border-purple-500 focus:border-red-500 focus:outline-none rounded-lg cursor-pointer transition-all duration-300 ease-in-out aspect-video border-dashed",
         {
           "bg-gray-100 border-2 border-gray-500": isDragging,
           "border-red-500": errors[name],
@@ -85,12 +85,12 @@ const ImageUploadField = <T extends FieldValues>({ form, name }: Props<T>) => {
       ) : (
         <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
           <Upload
-            className={`w-12 h-12 ${isDragging ? "text-gray-700" : "text-gray-400"}`}
+            className={`w-12 h-12 ${isDragging ? "text-purple-700 animate-bounce" : "text-purple-400"}`}
           />
           <p
-            className={`mt-2 text-sm ${isDragging ? "text-gray-700" : "text-gray-500"}`}
+            className={`mt-2 text-sm font-mono ${isDragging ? "text-purple-700" : "text-purple-500"}`}
           >
-            {isDragging ? "Drop image here" : "Click or drag image here"}
+            {isDragging && "Woohoo! Drop it like it's hot! 🔥"}
           </p>
         </div>
       )}

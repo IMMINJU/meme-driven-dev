@@ -1,5 +1,4 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js"
-import { Compass, FolderHeart, Terminal } from "lucide-react"
 import { authenticator } from "~/auth.server"
 import { FlowerIcon } from "~/components/icons"
 import MainLayout from "~/components/main-layout"
@@ -7,14 +6,19 @@ import Post from "~/components/post"
 import { supabase } from "~/supabase.server"
 import { PostType } from "~/types/post"
 import { ActionFunction, LoaderFunction, json } from "@remix-run/node"
-import { Link, useFetcher, useLoaderData } from "@remix-run/react"
+import { useFetcher, useLoaderData } from "@remix-run/react"
 import { useEffect, useRef, useState } from "react"
 
 const pageSize = 10
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request)
-  const env = { SUPABASE_BUCKET_URL: process.env.SUPABASE_BUCKET_URL }
+  const url = new URL(request.url)
+
+  const env = {
+    SUPABASE_BUCKET_URL: process.env.SUPABASE_BUCKET_URL,
+    rootUrl: url.origin,
+  }
   if (!user) {
     throw new Response("Not Found", { status: 404 })
   }
@@ -105,34 +109,12 @@ export default function Collection() {
 
   return (
     <MainLayout>
-      <div className="max-w-lg mx-auto space-y-8">
-        <div className="flex items-center gap-2">
-          <Terminal className="w-6 h-6" />
-          <h2 className="text-lg font-bold text-gray-800">Collection</h2>
-        </div>
+      <div className="mb-4 flex justify-center"></div>
+      <div className="columns-1 xl:columns-2 space-y-8 max-w-6xl mx-auto">
+        {posts.map((post) => (
+          <Post key={post.id} post={post} />
+        ))}
 
-        {posts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full space-y-4">
-            <FolderHeart className="h-16 w-16 text-gray-400" />
-            <h2 className="text-xl font-bold text-gray-800">
-              Your collection is empty
-            </h2>
-            <p className="text-gray-600 text-center">
-              Start exploring and add posts to your collection!
-            </p>
-            <Link
-              to="/explore"
-              className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-full hover:bg-blue-700 transition duration-150 ease-in-out flex items-center space-x-2"
-            >
-              <Compass className="h-4 w-4" />
-              <span>Explore</span>
-            </Link>
-          </div>
-        ) : (
-          posts.map((post) => <Post key={post.id} post={post} />)
-        )}
-
-        {/* 로딩 중일 때 표시 */}
         {fetcher.state === "submitting" && (
           <div className="flex items-center justify-center">
             <FlowerIcon className="animate-spin" />
@@ -140,12 +122,6 @@ export default function Collection() {
         )}
 
         <div ref={observerRef} className="h-10" />
-
-        {!hasMore && (
-          <div className="flex items-center justify-center">
-            <FlowerIcon />
-          </div>
-        )}
       </div>
     </MainLayout>
   )

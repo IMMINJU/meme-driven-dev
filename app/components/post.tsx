@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion"
-import { Calendar, Link, Tag, X } from "lucide-react"
+import { Link, Trash2, X } from "lucide-react"
 import { PostType } from "~/types/post"
-import { useLoaderData } from "@remix-run/react"
+import { UserType } from "~/types/user"
+import { Form, useLoaderData } from "@remix-run/react"
 import { useEffect, useRef, useState } from "react"
+import toast from "react-hot-toast"
 import { Button } from "@/components/ui/button"
-import ModalButton from "./modal-button"
 import ReportModal from "./report-modal"
 
 interface Props {
@@ -12,29 +13,23 @@ interface Props {
 }
 
 export default function Post({ post }: Props) {
-  const { SUPABASE_BUCKET_URL } = useLoaderData<{
+  const { user, SUPABASE_BUCKET_URL, rootUrl } = useLoaderData<{
+    user?: UserType
     SUPABASE_BUCKET_URL: string
+    rootUrl: string
   }>()
   const [fullImageSrc, setFullImageSrc] = useState<string | null>(null)
-  const imageRefs = useRef<{ [key: string]: HTMLImageElement | null }>({})
+  const imageRef = useRef<HTMLImageElement>(null)
 
   const handleImageClick = (postId: string, src: string) => {
-    const img = imageRefs.current[postId]
+    const img = imageRef.current
     if (img && img.naturalHeight > img.width) {
       setFullImageSrc(src)
     }
   }
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
-
   useEffect(() => {
-    const imageElements = Object.values(imageRefs.current)
+    const imageElements = imageRef.current
 
     const handleImageLoad = (img: HTMLImageElement) => {
       if (img.naturalHeight > img.width) {
@@ -48,100 +43,117 @@ export default function Post({ post }: Props) {
       }
     }
 
-    imageElements.forEach((img) => {
-      if (img) {
-        if (img.complete) {
-          handleImageLoad(img)
-        } else {
-          img.onload = () => handleImageLoad(img)
-        }
+    if (imageElements) {
+      if (imageElements.complete) {
+        handleImageLoad(imageElements)
+      } else {
+        imageElements.onload = () => handleImageLoad(imageElements)
       }
-    })
+    }
   }, [])
 
+  const [isLoaded, setIsLoaded] = useState(true)
+
+  useEffect(() => {
+    if (imageRef.current) {
+      const imgElement = imageRef.current
+
+      if (!imgElement.complete || imgElement.naturalHeight === 0) {
+        setIsLoaded(false)
+      }
+
+      imgElement.addEventListener("load", () => setIsLoaded(true))
+      imgElement.addEventListener("error", () => setIsLoaded(true))
+
+      return () => {
+        imgElement.removeEventListener("load", () => setIsLoaded(true))
+        imgElement.removeEventListener("error", () => setIsLoaded(true))
+      }
+    }
+  }, [])
+
+  const handleCopyLink = (postId: string) => {
+    const dummyLink = `${rootUrl}/post/${postId}`
+    navigator.clipboard.writeText(dummyLink).then(() => {
+      toast.success(`Link copied to clipboard! 🔗✨`, {
+        position: "top-center",
+      })
+    })
+  }
+
+  const [isLoading, setLoading] = useState(false)
+
+  const handleDelete = async () => {
+    setLoading(true)
+    const formData = new FormData()
+    formData.append("id", post.id)
+    const response = await fetch("/post", {
+      method: "delete",
+      body: formData,
+    })
+    if (response.ok) {
+      window.location.reload()
+    }
+    setLoading(false)
+  }
+
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 100 }}
-      className="bg-white border border-gray-200 rounded overflow-hidden shadow-sm hover:shadow-md"
-    >
-      <div className="p-3 border-b border-gray-200">
-        <h3 className="text-base font-semibold text-gray-800">
-          $ {post.title}
-        </h3>
-      </div>
-      <button
-        type="button"
-        className="relative w-full"
-        onClick={() =>
-          handleImageClick(post.id, `${SUPABASE_BUCKET_URL}/${post.image}`)
-        }
-      >
-        <img
-          ref={(el) => (imageRefs.current[post.id] = el)}
-          src={`${SUPABASE_BUCKET_URL}/${post.image}`}
-          alt={post.title || `Meme ${post.id}`}
-          className="w-full h-auto"
-        />
-      </button>
-      <div className="p-3">
-        <div className="flex flex-wrap gap-1 mb-3">
-          {post.tags.map((tag) => (
+    <>
+      <article className="bg-gradient-to-br from-white to-blue-100 p-6 rounded-lg shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 animate-gradient" />
+        <h2 className="text-2xl font-bold mb-2 opacity-100">
+          {"<" + post.title + " />"}
+        </h2>
+        <button
+          type="button"
+          className="relative w-full"
+          onClick={() =>
+            handleImageClick(post.id, `${SUPABASE_BUCKET_URL}/${post.image}`)
+          }
+        >
+          {!isLoaded && (
+            <div className="w-full aspect-square bg-gray-200 animate-pulse mb-4" />
+          )}
+          <img
+            ref={imageRef}
+            src={`${SUPABASE_BUCKET_URL}/${post.image}`}
+            alt={post.title}
+            className="w-full h-auto object-cover mb-4"
+          />
+        </button>
+
+        <div className="flex flex-wrap gap-2 mb-2">
+          {post.tags.map((tag, index) => (
             <span
-              key={tag}
-              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+              key={index}
+              className="bg-gradient-to-r from-blue-400 to-purple-500 text-white px-3 py-1 rounded-full text-xs md:text-sm font-semibold animate-pulse shadow-sm"
             >
-              <Tag className="h-3 w-3 mr-1" />
-              {tag}
+              #{tag}
             </span>
           ))}
         </div>
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-          <div className="flex items-center space-x-3">
-            <span className="flex items-center">
-              <Calendar className="h-4 w-4 mr-1" />
-              {formatDate(post.created_at)}
-            </span>
-            <span>{24} Likes</span>
-          </div>
-          {/* <div className="flex items-center">
-            <span className="font-medium text-gray-800">
-              @{post.user.name}
-            </span>
-          </div> */}
-        </div>
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          {post.source?.type === "link" ? (
-            <a
-              href={post.source.value}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center hover:text-blue-500 transition duration-150 ease-in-out"
-            >
-              <Link className="h-4 w-4 mr-1" />
-              {post.source.value}
-            </a>
-          ) : post.source?.type === "text" ? (
-            <p className="flex items-center transition duration-150 ease-in-out">
-              <Link className="h-4 w-4 mr-1" />
-              {post.source.value}
-            </p>
-          ) : (
-            <div />
-          )}
-
-          <ModalButton
-            variant="ghost"
-            className="p-0 hover:bg-transparent text-xs font-normal text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out"
-            modalContent={(onClose) => (
-              <ReportModal postId={post.id} closeModal={onClose} />
-            )}
+        <div className="flex justify-end space-x-2">
+          <Button
+            onClick={() => handleCopyLink(post.id)}
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded"
+            aria-label={`Copy link for ${post.title}`}
           >
-            Report
-          </ModalButton>
+            <Link size={16} />
+          </Button>
+          {post.user.id === user?.id && (
+            <Form onSubmit={handleDelete}>
+              <input type="hidden" name="id" value={post.id} />
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="bg-red-500 hover:bg-red-600 text-white rounded"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </Form>
+          )}
         </div>
-      </div>
+      </article>
 
       <AnimatePresence>
         {fullImageSrc && (
@@ -178,6 +190,6 @@ export default function Post({ post }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.article>
+    </>
   )
 }

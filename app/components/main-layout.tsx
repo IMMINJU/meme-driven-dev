@@ -1,17 +1,18 @@
-import { PropsWithChildren } from "react"
+import { PropsWithChildren, useState } from "react"
 import Header from "./header"
 import Rank from "./rank"
 import Sidebar from "./sidebar"
 
 const MainLayout: React.FC<PropsWithChildren> = ({ children }) => {
-  return (
-    <div className="flex flex-col h-screen text-gray-800 text-sm">
-      <Header />
+  const [showSidebar, setShowSidebar] = useState(false)
 
-      <div className="flex-1 overflow-hidden">
-        <div className="max-w-5xl mx-auto h-full flex flex-col md:flex-row">
-          <Sidebar />
-          <main className="flex-1 p-4 overflow-y-auto scrollbar-hide">
+  return (
+    <div className="flex h-screen bg-gradient-to-r from-yellow-300 via-pink-500 to-purple-300 font-mono text-green-800 overflow-hidden">
+      <Sidebar showSidebar={showSidebar} />
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <Header setShowSidebar={setShowSidebar} />
+        <div className="flex flex-1 overflow-hidden">
+          <main className="flex-1 overflow-y-auto p-4 bg-opacity-50 bg-red-200 scrollbar-hide">
             {children}
           </main>
 

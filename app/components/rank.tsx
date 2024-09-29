@@ -1,93 +1,41 @@
-import { ThumbsUp, Users } from "lucide-react"
-import { Link } from "@remix-run/react"
+import { Coffee, Pizza, Zap } from "lucide-react"
 import { useEffect, useState } from "react"
 
-type PopularPost = {
-  id: number
-  title: string
-  likes: number
-}
-
-type Tournament = {
-  id: number
-  title: string
-  participants: number
-}
-
 const Rank = () => {
-  const [popularPosts, setPopularPosts] = useState<PopularPost[]>([])
-  const [tournaments, setTournaments] = useState<Tournament[]>([])
+  const [randomEmoji, setRandomEmoji] = useState("🤪")
 
   useEffect(() => {
-    const initialPopularPosts: PopularPost[] = [
-      { id: 1, title: "10 React Hooks You Must Know", likes: 230 },
-      { id: 2, title: "The Future of JavaScript", likes: 185 },
-      { id: 3, title: "Building Scalable Node.js Apps", likes: 162 },
-    ]
-    setPopularPosts(initialPopularPosts)
-
-    const initialTournaments: Tournament[] = [
-      { id: 1, title: "React Code Challenge", participants: 256 },
-      { id: 2, title: "Vue.js Hackathon", participants: 128 },
-      { id: 3, title: "JavaScript Algorithms", participants: 512 },
-    ]
-    setTournaments(initialTournaments)
+    const emojis = ["🤪", "🥴", "🤯", "🙃", "🫠", "🤖", "👾", "🤡"]
+    const interval = setInterval(() => {
+      setRandomEmoji(emojis[Math.floor(Math.random() * emojis.length)])
+    }, 1000)
+    return () => clearInterval(interval)
   }, [])
 
   return (
-    <aside className="hidden md:block w-48 p-4 overflow-y-auto scrollbar-hide border-t md:border-t-0 md:border-l border-gray-200">
-      <div className="space-y-6">
-        {/* Popular Posts */}
-        <section>
-          <h2 className="text-sm font-semibold text-gray-800 mb-2">
-            Popular Posts
-          </h2>
-          <ul className="space-y-2">
-            {popularPosts.map((post) => (
-              <li
-                key={post.id}
-                className="text-xs flex items-center justify-between"
-              >
-                <Link
-                  to="#"
-                  className="hover:text-gray-600 transition duration-150 ease-in-out truncate flex-1"
-                >
-                  {post.title}
-                </Link>
-                <span className="flex items-center text-gray-500 ml-2">
-                  <ThumbsUp className="h-3 w-3 mr-1" />
-                  {post.likes}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Tournaments */}
-        <section>
-          <h2 className="text-sm font-semibold text-gray-800 mb-2">
-            Tournaments
-          </h2>
-          <ul className="space-y-2">
-            {tournaments.map((tournament) => (
-              <li
-                key={tournament.id}
-                className="text-xs flex items-center justify-between"
-              >
-                <Link
-                  to="#"
-                  className="hover:text-gray-600 transition duration-150 ease-in-out truncate flex-1"
-                >
-                  {tournament.title}
-                </Link>
-                <span className="flex items-center text-gray-500 ml-2">
-                  <Users className="h-3 w-3 mr-1" />
-                  {tournament.participants}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+    <aside className="hidden md:block w-64 bg-yellow-200 p-4 overflow-y-auto">
+      <h3 className="text-xl md:text-2xl font-bold mb-4 text-blue-600 animate-pulse">
+        Random Stuff
+      </h3>
+      <div className="space-y-4">
+        <div className="bg-pink-300 p-3 rounded-lg">
+          <p className="text-base md:text-lg font-semibold">
+            Emoji of the second: {randomEmoji}
+          </p>
+        </div>
+        <div className="bg-green-300 p-3 rounded-lg">
+          <p className="text-xs md:text-sm">
+            {`if (coffee.isEmpty()) { 
+                  programmer.refill(coffee);
+                  bug.fixItself();
+                }`}
+          </p>
+        </div>
+        <div className="flex items-center justify-around text-2xl md:text-4xl">
+          <Zap className="text-yellow-500 animate-bounce" />
+          <Coffee className="text-brown-500 animate-pulse" />
+          <Pizza className="text-red-500 animate-spin" />
+        </div>
       </div>
     </aside>
   )

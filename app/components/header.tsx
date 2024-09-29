@@ -1,167 +1,77 @@
-import clsx from "clsx"
-import {
-  Compass,
-  FolderHeart,
-  LogOut,
-  Menu,
-  Settings,
-  Terminal,
-  Trophy,
-  X,
-} from "lucide-react"
+import { LogOut, Menu, Upload, User } from "lucide-react"
 import { UserType } from "~/types/user"
-import { Link, useLoaderData } from "@remix-run/react"
+import { Form, useLoaderData } from "@remix-run/react"
 import { useState } from "react"
-import { UploadIcon } from "./icons"
-import ModalButton from "./modal-button"
-import SettingModal from "./setting-modal"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Button } from "./ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu"
+import { Dialog } from "./ui/dialog"
 import UploadModal from "./upload-modal"
 
-export default function Header() {
+export default function Header({ setShowSidebar }) {
   const data = useLoaderData<{ user?: UserType }>()
   const user = data?.user
-  const [open, setModalVisible] = useState(false)
 
-  const showModal = () => setModalVisible(true)
-  const closeModal = () => setModalVisible(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isHovered, setIsHovered] = useState<{
-    compass: boolean
-    upload: boolean
-    search: boolean
-  }>({ compass: false, upload: false, search: false })
-
-  const setHoverValue = (key: keyof typeof isHovered, value: boolean) =>
-    setIsHovered((prev) => ({ ...prev, [key]: value }))
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [openUploadModal, setUploadModalVisible] = useState(false)
 
   return (
     <>
-      <header className="sticky top-0 z-50  border-gray-200">
-        <div className="max-w-5xl mx-auto flex items-center justify-between p-3">
-          <div className="flex items-center space-x-2">
-            <Terminal className="h-6 w-6 text-gray-800" />
-            <h1 className="text-xl font-mono font-semibold text-gray-800">
-              OddDevs 🎭
-            </h1>
-          </div>
-          <div className="flex gap-x-4 items-center">
-            <ModalButton
-              variant="ghost"
-              onMouseEnter={() => setHoverValue("upload", true)}
-              onMouseLeave={() => setHoverValue("upload", false)}
-              modalContent={(closeModal) => (
-                <UploadModal onClose={closeModal} />
-              )}
-              className="p-0 flex items-center gap-x-3 text-gray-600 hover:text-gray-800 hover:bg-transparent hover:underline underline-offset-2"
-            >
-              <p className="hidden sm:block text-sm font-medium">{`meme.upload()`}</p>
-
-              <div
-                className={clsx(
-                  "flex items-center text-white justify-center h-8 w-8 max-w-8 rounded-sm bg-gray-800 transition duration-150 ease-in-out",
-                  { "bg-gray-900": isHovered.upload }
-                )}
+      <header className="bg-green-300 p-4 transform rotate-1 flex justify-between items-center z-10">
+        <div className="flex items-center">
+          <button
+            type="button"
+            className="mr-4 lg:hidden text-purple-600 hover:text-purple-800"
+            onClick={() => setShowSidebar((prev) => !prev)}
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-purple-600 animate-pulse">
+            {`<OddDevs `}
+            <span className="hidden sm:inline-block">{`error={true}`}</span>
+            {` />`}
+          </h1>
+        </div>
+        <div className="flex items-center space-x-4">
+          <button
+            type="button"
+            onClick={() => setUploadModalVisible(true)}
+            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          >
+            <Upload size={24} />
+          </button>
+          <div className="relative">
+            {user && (
+              <button
+                type="button"
+                className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
               >
-                <UploadIcon animate={isHovered.upload} />
-              </div>
-            </ModalButton>
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="relative p-0 rounded-full overflow-hidden h-8 max-w-8 w-8"
-                  >
-                    <Avatar>
-                      <AvatarImage src={user.photo} alt={`@${user.name}`} />
-                      <AvatarFallback>
-                        {user.name[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  sideOffset={10}
-                  className="w-40"
-                  align="end"
-                  forceMount
-                >
-                  {/* <DropdownMenuItem>
-                    <Folder className="mr-2 h-4 w-4" />
-                    Collection
-                  </DropdownMenuItem> */}
-                  <DropdownMenuItem onClick={showModal}>
-                    <Button variant="ghost" className="p-0 h-auto font-normal">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => {}}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="w-8" />
+                <User size={24} />
+              </button>
             )}
-
-            <button
-              type="button"
-              className="md:hidden text-gray-600 hover:text-gray-800"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+            {user && showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-gradient-to-r from-pink-400 to-purple-500 rounded-md shadow-lg py-1 z-10 transform -rotate-3">
+                <Form method="post" action="/logout">
+                  <button
+                    type="submit"
+                    className="w-full px-4 py-2 text-sm text-white hover:bg-opacity-20 hover:bg-black flex items-center"
+                  >
+                    <LogOut size={18} className="mr-2 animate-bounce" />{" "}
+                    {"<Logout />"}
+                  </button>
+                </Form>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden border-b border-gray-200 p-4">
-          <nav className="flex flex-col space-y-4 items-end">
-            <Link
-              to="/explore"
-              className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
-            >
-              <Compass className="h-4 w-4 mr-2" />
-              Explore
-            </Link>
-            <Link
-              to="tournament"
-              className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
-            >
-              <Trophy className="h-4 w-4 mr-2" />
-              Tournament
-            </Link>
-            {user && (
-              <Link
-                to="collection"
-                className="text-sm font-medium text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out flex items-center"
-              >
-                <FolderHeart className="h-4 w-4 mr-2" />
-                Collection
-              </Link>
-            )}
-          </nav>
-        </div>
+      {openUploadModal && (
+        <Dialog
+          open={openUploadModal}
+          onOpenChange={() => setUploadModalVisible(false)}
+        >
+          <UploadModal onClose={() => setUploadModalVisible(false)} />
+        </Dialog>
       )}
-
-      {open && <SettingModal user={user} onClose={closeModal} />}
     </>
   )
 }

@@ -51,15 +51,13 @@ const TagInput = <T extends FieldValues>({ form, name, ...rest }: Props<T>) => {
         {tags.map((tag, index) => (
           <span
             key={index}
-            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+            className="bg-purple-300 text-purple-800 px-2 py-1 rounded-full font-mono text-sm flex items-center"
           >
-            <Tag className="h-3 w-3 mr-1" />
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="ml-1 focus:outline-none"
-              aria-label={`Remove ${tag} tag`}
+              className="ml-1 text-purple-600 hover:text-purple-800"
             >
               <X size={14} />
             </button>
@@ -71,11 +69,14 @@ const TagInput = <T extends FieldValues>({ form, name, ...rest }: Props<T>) => {
         {...rest}
         onChange={handleInputChange}
         onKeyDown={handleInputKeyDown}
-        className={clsx({ "border-red-500": errors[name] })}
+        className={clsx(
+          "w-full p-2 rounded bg-yellow-100 border-2 border-purple-500 focus:border-red-500 focus:outline-none transform hover:scale-105 transition-transform",
+          { "border-red-500": errors[name] }
+        )}
       />
       <input
         type="hidden"
-        {...register(name, { required: true, minLength: 1 })}
+        {...register(name, { required: true, minLength: 1, maxLength: 5 })}
       />
     </div>
   )
