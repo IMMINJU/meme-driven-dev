@@ -120,9 +120,8 @@ export default function Collection() {
             <FlowerIcon className="animate-spin" />
           </div>
         )}
-
-        <div ref={observerRef} className="h-10" />
       </div>
+      <div ref={observerRef} className="h-10" />
     </MainLayout>
   )
 }

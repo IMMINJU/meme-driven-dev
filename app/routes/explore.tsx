@@ -107,9 +107,8 @@ export default function Explore() {
         {posts.map((post) => (
           <Post key={post.id} post={post} />
         ))}
-
-        <div ref={observerRef} className="h-10" />
       </div>
+      <div ref={observerRef} className="h-10" />
     </MainLayout>
   )
 }
