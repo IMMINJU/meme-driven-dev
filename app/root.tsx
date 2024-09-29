@@ -1,5 +1,5 @@
 import { Cog, Hammer, Wrench } from "lucide-react"
-import { LoaderFunction, json } from "@remix-run/node"
+import { LoaderFunction, MetaFunction, json } from "@remix-run/node"
 import {
   Links,
   Meta,
@@ -68,6 +68,13 @@ export function ErrorBoundary() {
     </div>
   )
 }
+
+export const meta: MetaFunction = () => [
+  { charset: "utf-8" },
+  { title: "OddDevs" },
+  { property: "og:title", content: "OddDevs" },
+  { property: "og:image", content: "/favicon.ico" },
+]
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request)
